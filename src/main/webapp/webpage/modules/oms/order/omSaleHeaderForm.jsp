@@ -159,13 +159,14 @@
         function skuDelete(idx) {
             $("input[id^=omSaleDetailList" + idx + "]").each(function () {
                 let $Id = $(this).attr("id");
+                let id = "omSaleDetailList" + idx + "_id";
                 let delFlag = "omSaleDetailList" + idx + "_delFlag";
                 let ratio = "omSaleDetailList" + idx + "_ratio";
                 if ($Id === delFlag) {
                     $('#' + $Id).val('0');
                 } else if ($Id === ratio) {
                     $('#' + $Id).val('1');
-                } else {
+                } else if ($Id !== id){
                     $('#' + $Id).val('');
                 }
             });
@@ -188,7 +189,7 @@
             let auxiliaryQty = math.bignumber((qty.mul(ratio)).toFixed(4));
             $('#omSaleDetailList' + idx + '_auxiliaryQty').val(auxiliaryQty);
 
-            priceChange(idx, 1);
+            priceChange(idx, '1');
         }
 
         function priceChange(idx, flag) {
@@ -613,9 +614,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="width-8" rowspan="2"><label class="pull-right">备注信息</label></td>
-                        <td class="width-12" rowspan="2" colspan="3">
-                            <form:textarea path="remarks" htmlEscape="false" rows="2" class="form-control"/>
+                        <td class="width-8" ><label class="pull-right">备注信息</label></td>
+                        <td class="width-12" colspan="9">
+                            <form:input path="remarks" htmlEscape="false" class="form-control"/>
                         </td>
                     </tr>
                     </tbody>
@@ -903,7 +904,7 @@
                     <tr>
                         <td class="width-8"><label class="pull-right">出纳备注</label></td>
                         <td colspan="9">
-                            <form:textarea path="cashierRemarks" rows="1" htmlEscape="false" class="form-control"/>
+                            <form:input path="cashierRemarks" htmlEscape="false" class="form-control"/>
                         </td>
                     </tr>
                     </tbody>
@@ -998,11 +999,9 @@
                     </tr>
                     <tr style="border-bottom: 1px solid #ddd">
                         <td class="width-8"><label class="pull-right">备注</label></td>
-                        <td colspan="5">
-                            <form:textarea path="auditRemarks" rows="1" htmlEscape="false" class="form-control"/>
+                        <td colspan="7">
+                            <form:input path="auditRemarks" htmlEscape="false" class="form-control"/>
                         </td>
-                        <td class="width-8"></td>
-                        <td class="width-12"></td>
                         <td class="width-8"></td>
                         <td class="width-12"></td>
                     </tr>
@@ -1029,10 +1028,16 @@
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                             </div>
                         </td>
+                        <td class="width-8"></td>
+                        <td class="width-12"></td>
+                    </tr>
+                    <tr>
                         <td class="width-8"><label class="pull-right">更新内容</label></td>
-                        <td class="width-12">
-                            <form:textarea path="updateContent" rows="1" htmlEscape="false" class="form-control"/>
+                        <td colspan="7">
+                            <form:input path="updateContent" htmlEscape="false" class="form-control"/>
                         </td>
+                        <td class="width-8"></td>
+                        <td class="width-12"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -1098,7 +1103,7 @@
     <td width="10%">
         <sys:grid title="商品" url="${ctx}/oms/basic/omItemPrice/popData" cssClass="form-control required"
                   fieldId="" fieldName="" fieldKeyName="" readonly="true"
-                  displayFieldId="omPoDetailList{{idx}}_skuCode" displayFieldName="omPoDetailList[{{idx}}].skuCode"
+                  displayFieldId="omSaleDetailList{{idx}}_skuCode" displayFieldName="omSaleDetailList[{{idx}}].skuCode"
                   displayFieldKeyName="skuCode" displayFieldValue="{{row.skuCode}}"
                   fieldLabels="商品编码|商品名称" fieldKeys="skuCode|skuName"
                   searchLabels="商品编码|商品名称" searchKeys="skuCode|skuName"
@@ -1189,7 +1194,7 @@
                 $('#omSaleDetailList' + omSaleDetailRowIdx + "_discount").prop("readonly", true);
             } else {
                 let isAllowEdit = $('#omSaleDetailList' + omSaleDetailRowIdx + "_isAllowAdjustment").val();
-                if (isAllowEdit && isAllowEdit == 'N') {
+                if (isAllowEdit && isAllowEdit === 'N') {
                     $('#omSaleDetailList' + omSaleDetailRowIdx + "_qty").prop("readonly", true);
                     $('#omSaleDetailList' + omSaleDetailRowIdx + "_taxPrice").prop("readonly", true);
                     $('#omSaleDetailList' + omSaleDetailRowIdx + "_taxRate").prop("disabled", true);

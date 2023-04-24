@@ -347,8 +347,19 @@ public class PushTmsService extends BaseService {
         String orgId = wmSoEntity.getOrgId();
         Office org = officeService.get(orgId);
 
-        TmTransportObj rOutlet = this.getCustomer(org.getCode(), CustomerType.OUTLET.getCode(), orgId);
-        TmTransportObj customer = this.getCustomer(wmSoEntity.getOwnerCode(), CustomerType.CONSIGNEE.getCode(), orgId);
+        TmTransportObj rOutlet = tmTransportObjService.getByCode(org.getCode(), orgId);
+        if (rOutlet == null) {
+            rOutlet = new TmTransportObj();
+            rOutlet.setTransportObjCode(org.getCode());
+            rOutlet.setTransportObjName(org.getName());
+            rOutlet.setTransportObjType(CustomerType.OUTLET.getCode() + ",");
+            rOutlet.setOrgId(orgId);
+            tmTransportObjService.save(rOutlet);
+        } else if (!rOutlet.getTransportObjType().contains(CustomerType.OUTLET.getCode())) {
+            rOutlet.setTransportObjType(rOutlet.getTransportObjType() + (rOutlet.getTransportObjType().endsWith(",") ? "" : ",") + CustomerType.OUTLET.getCode() + ",");
+            tmTransportObjService.save(rOutlet);
+        }
+        TmTransportObj customer = this.getCustomer(wmSoEntity.getOwnerCode(), CustomerType.OWNER.getCode(), orgId);
         TmTransportObj consignee = this.getCustomer(wmSoEntity.getConsigneeCode(), CustomerType.CONSIGNEE.getCode(), orgId);
         this.getCustomer(wmSoEntity.getCarrierCode(), CustomerType.CARRIER.getCode(), orgId);
 
@@ -358,7 +369,7 @@ public class PushTmsService extends BaseService {
         entity.setTransportNo(noService.getDocumentNo(GenNoType.TM_TRANSPORT_NO.name()));
         entity.setOrderTime(wmSoEntity.getOrderTime());
         entity.setOrderStatus(TmsConstants.TRANSPORT_ORDER_STATUS_00);
-        entity.setOrderType(wmSoEntity.getDef13());
+        entity.setOrderType("1");
 
         entity.setPrincipalCode(wmSoEntity.getOwnerCode());
         entity.setCustomerCode(customer.getTransportObjCode());

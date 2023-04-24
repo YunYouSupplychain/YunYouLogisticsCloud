@@ -440,13 +440,15 @@
 		</if>
 		<if test="customerNo != null and customerNo != ''">
 			AND (
-			    a.customer_no = #{customerNo} OR (a.customer_no = '无'
-				<if test="noSkuList != null and noSkuList.size > 0">
-					AND a.sku_code NOT IN
-					<foreach collection="noSkuList" item="skuCode" open="(" separator=","  close=")">
-						#{skuCode}
-					</foreach>
-				</if>)
+			    a.customer_no = #{customerNo}
+			    OR (a.customer_no = '无'
+					<if test="noSkuList != null and noSkuList.size > 0">
+						AND a.sku_code NOT IN
+						<foreach collection="noSkuList" item="noSkuCode" open="(" separator=","  close=")">
+							#{noSkuCode}
+						</foreach>
+					</if>
+			    )
 			)
 		</if>
 		LEFT JOIN om_customer b ON a.customer_no = b.ebcu_customer_no AND a.org_id = b.org_id

@@ -251,11 +251,11 @@
                             <li><a id="intercept" onclick="intercept()">拦截订单</a></li>
                         </shiro:hasPermission>
                         <shiro:hasPermission name="outbound:banQinWmSoHeader:updateConsigneeInfo">
-                            <li><a id="updateConsigneeInfo" onclick="updateConsigneeInfo()">更新收货信息</a>
-                        </shiro:hasPermission>
-                        <shiro:hasPermission name="outbound:banQinWmSoHeader:updateCarrierInfo">
-                            <li><a id="updateCarrierInfo" onclick="updateCarrierInfo()">更新承运商信息</a>
-                        </shiro:hasPermission>
+                        <li><a id="updateConsigneeInfo" onclick="updateConsigneeInfo()">更新收货信息</a>
+                            </shiro:hasPermission>
+                            <shiro:hasPermission name="outbound:banQinWmSoHeader:updateCarrierInfo">
+                        <li><a id="updateCarrierInfo" onclick="updateCarrierInfo()">更新承运商信息</a>
+                            </shiro:hasPermission>
                     </ul>
                 </div>
                 <div class="btn-group">
@@ -275,9 +275,15 @@
                 <div class="btn-group">
                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">打印<span class="caret"></span></button>
                     <ul class="dropdown-menu">
-                        <li><a id="printPickingOrder" onclick="printPickingOrder()">打印拣货单</a></li>
-                        <li><a id="printPickingOrderLandscape" onclick="printPickingOrderLandscape()">打印拣货单（横版）</a></li>
-                        <li><a id="printShipHandoverOrder" onclick="printShipHandoverOrder()">打印出库确认交接单</a></li>
+                        <shiro:hasPermission name="outbound:banQinWmSoHeader:printPickingOrderLandscape">
+                            <li><a id="printPickingOrder" onclick="printPickingOrder()">打印拣货单</a></li>
+                        </shiro:hasPermission>
+                        <shiro:hasPermission name="outbound:banQinWmSoHeader:printPickingOrderLandscape">
+                            <li><a id="printPickingOrderLandscape" onclick="printPickingOrderLandscape()">打印拣货单（横版）</a></li>
+                        </shiro:hasPermission>
+                        <shiro:hasPermission name="outbound:banQinWmSoHeader:printShipHandoverOrder">
+                            <li><a id="printShipHandoverOrder" onclick="printShipHandoverOrder()">打印出库确认交接单</a></li>
+                        </shiro:hasPermission>
                     </ul>
                 </div>
                 <a id="search" class="btn btn-primary"><i class="fa fa-search"></i> 查询</a>
@@ -388,7 +394,8 @@
                                                displayFieldId="groupName" displayFieldName="groupName" displayFieldKeyName="groupName" displayFieldValue=""
                                                selectButtonId="ruleGroupSelectId" deleteButtonId="ruleGroupDeleteId"
                                                fieldLabels="规则组编码|规则组名称" fieldKeys="groupCode|groupName"
-                                               concatId="waveGroupName,ownerCodeC,ownerNameC,skuCodeC,skuNameC,addrArea" concatName="groupName,ownerCode,ownerName,skuCode,skuName,addrArea"
+                                               concatId="waveGroupName,ownerCodeC,ownerNameC,skuCodeC,skuNameC,addrArea"
+                                               concatName="groupName,ownerCode,ownerName,skuCode,skuName,addrArea"
                                                searchLabels="规则组编码|规则组名称" searchKeys="groupCode|groupName" inputSearchKey="ruleCodeAndName" afterSelect="afterSelectGroup">
                                 </sys:popSelect>
                             </td>

@@ -76,7 +76,7 @@
                     </td>
                     <td class="active" style="width: 70%;">
                         <div class="myCheckBox"><input type="checkbox" id="OMS" value="OMS" checked><label for="OMS">订单管理系统&nbsp;</label></div>
-                        <div class="myCheckBox"><input type="checkbox" id="SMS" value="SMS" checked><label for="SMS">商超管理系统&nbsp;</label></div>
+                        <%--<div class="myCheckBox"><input type="checkbox" id="SMS" value="SMS" checked><label for="SMS">商超管理系统&nbsp;</label></div>--%>
                         <div class="myCheckBox"><input type="checkbox" id="WMS" value="WMS" checked><label for="WMS">仓储管理系统&nbsp;</label></div>
                         <div class="myCheckBox"><input type="checkbox" id="TMS" value="TMS" checked><label for="TMS">运输管理系统&nbsp;</label></div>
                         <div class="myCheckBox"><input type="checkbox" id="BMS" value="BMS" checked><label for="BMS">计费管理系统&nbsp;</label></div>

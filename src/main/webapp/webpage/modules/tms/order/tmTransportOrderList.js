@@ -56,8 +56,8 @@ $(document).ready(function () {
 	$("#baseOrgId").val(tmOrg.id);
 	$("#orderTimeFm").datetimepicker({format: "YYYY-MM-DD 00:00:00"});
 	$("#orderTimeTo").datetimepicker({format: "YYYY-MM-DD 23:59:59"});
-	$("#orderTimeFm input").val(jp.dateFormat(new Date().addTime("Day", -3), "yyyy-MM-dd") + " 00:00:00");
-	$("#orderTimeTo input").val(jp.dateFormat(new Date().addTime("Day", 3), "yyyy-MM-dd") + " 23:59:59");
+	$("#orderTimeFm input").val(jp.dateFormat(new Date(), "yyyy-MM-dd") + " 00:00:00");
+	$("#orderTimeTo input").val(jp.dateFormat(new Date(), "yyyy-MM-dd") + " 23:59:59");
 
 	// 初始化各页签中Bootstrap表格
 	$("#allTable").bootstrapTable(getOption(allParams));

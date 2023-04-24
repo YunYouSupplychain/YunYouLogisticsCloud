@@ -144,7 +144,7 @@
             </td>
             <td class="width-10"><label class="pull-right">往来户</label></td>
             <td class="width-15">
-                <sys:grid title="选择往来户" url="${ctx}/oms/basic/omCustomer/popData" cssClass="form-control required"
+                <sys:grid title="选择往来户" url="${ctx}/oms/basic/omCustomer/popData" cssClass="form-control"
                           fieldId="customerNo" fieldName="customerNo"
                           fieldKeyName="ebcuCustomerNo" fieldValue="${omItemPriceEntity.customerNo}"
                           displayFieldId="customerName" displayFieldName="customerName"

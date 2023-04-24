@@ -204,13 +204,14 @@
         function skuDelete(idx) {
             $("input[id^=omPoDetailList" + idx + "]").each(function () {
                 let $Id = $(this).attr("id");
+                let id = "omPoDetailList" + idx + "_id";
                 let delFlag = "omPoDetailList" + idx + "_delFlag";
                 let ratio = "omPoDetailList" + idx + "_ratio";
                 if ($Id === delFlag) {
                     $('#' + $Id).val('0');
                 } else if ($Id === ratio) {
                     $('#' + $Id).val('1');
-                } else {
+                } else if ($Id !== id){
                     $('#' + $Id).val('');
                 }
             });
@@ -982,11 +983,11 @@
                 $('#omPoDetailList' + omPoDetailRowIdx + "_discount").prop("readonly", true);
             } else {
                 let isAllowEdit = $('#omPoDetailList' + omPoDetailRowIdx + "_isAllowAdjustment").val();
-                if (isAllowEdit && isAllowEdit == 'N') {
-                    $('#omSaleDetailList' + omSaleDetailRowIdx + "_qty").prop("readonly", true);
-                    $('#omSaleDetailList' + omSaleDetailRowIdx + "_taxPrice").prop("readonly", true);
-                    $('#omSaleDetailList' + omSaleDetailRowIdx + "_taxRate").prop("disabled", true);
-                    $('#omSaleDetailList' + omSaleDetailRowIdx + "_discount").prop("readonly", true);
+                if (isAllowEdit && isAllowEdit === 'N') {
+                    $('#omPoDetailList' + omPoDetailRowIdx + "_qty").prop("readonly", true);
+                    $('#omPoDetailList' + omPoDetailRowIdx + "_taxPrice").prop("readonly", true);
+                    $('#omPoDetailList' + omPoDetailRowIdx + "_taxRate").prop("disabled", true);
+                    $('#omPoDetailList' + omPoDetailRowIdx + "_discount").prop("readonly", true);
                 } else {
                     $('#omPoDetailList' + omPoDetailRowIdx + "_qty").prop("readonly", false);
                     $('#omPoDetailList' + omPoDetailRowIdx + "_taxPrice").prop("readonly", false);

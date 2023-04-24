@@ -211,7 +211,7 @@
             </div>
         </div>
     </div>
-    <div class="wrapper wrapper-content-my">
+    <div class="wrapper wrapper-content-my" style="display: none">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">直通系统</h3>

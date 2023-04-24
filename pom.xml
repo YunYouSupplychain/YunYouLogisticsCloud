@@ -6,7 +6,7 @@
 
     <groupId>com.yunyou.source</groupId>
     <artifactId>56between</artifactId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
     <packaging>war</packaging>
 
     <properties>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.yunyou.source</groupId>
             <artifactId>56between-core</artifactId>
-            <version>1.1.3</version>
+            <version>1.1.4</version>
             <exclusions>
                 <exclusion>
                     <artifactId>xml-apis</artifactId>
@@ -303,7 +303,7 @@
     </dependencies>
 
     <build>
-        <finalName>56between</finalName>
+        <finalName>yunyou</finalName>
         <!--加载资源文件-->
         <resources>
             <!--mapper.xml-->
