@@ -2,10 +2,10 @@
 <img alt="logo" src="https://prd-yunyou.oss-cn-hangzhou.aliyuncs.com/baklib/yylogo.png" width="120" height="120">
 </p>
 <p align="center">
-<img  src="https://img.shields.io/badge/标准版-v1.0-brightgreen.svg"> <img  src="https://img.shields.io/badge/JDK-1.8-important.svg"> <img  src="https://img.shields.io/badge/MySQL-8.0-important.svg"> <img  src="https://img.shields.io/badge/Redis-5.0-important.svg">  <img  src="https://img.shields.io/badge/License-GPL2.0-lightgrey.svg">
+<img  src="https://img.shields.io/badge/JDK-1.8-important.svg"> <img  src="https://img.shields.io/badge/MySQL-8.0-important.svg"> <img  src="https://img.shields.io/badge/Redis-5.0-important.svg">  <img  src="https://img.shields.io/badge/License-GPL2.0-lightgrey.svg">
 </p>
 <p align="center">
-<img  src="https://img.shields.io/badge/Copyright-芸柚物流云-60569f.svg"> <img  src="https://img.shields.io/badge/标准版版-v1.0.1-60569f.svg">
+<img  src="https://img.shields.io/badge/Copyright-芸柚物流云-60569f.svg"> <img  src="https://img.shields.io/badge/版本-v1.0-60569f.svg">
 </p>
 <p align="center">
 <img  src="https://img.shields.io/badge/产品上线-OMS系统-f44e91.svg "> <img  src="https://img.shields.io/badge/WMS系统-f44e91.svg "> <img  src="https://img.shields.io/badge/TMS系统-f44e91.svg "> <img  src="https://img.shields.io/badge/BMS系统-f44e91.svg ">
