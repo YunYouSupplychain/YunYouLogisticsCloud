@@ -38,7 +38,7 @@ public class BmsBillStatisticsController extends BaseController {
      * 应收列表页面
      */
     @RequiresPermissions("bms:finance:bmsBillStatistics:list:receivable")
-    @RequestMapping("list/receivable")
+    @RequestMapping("/receivable/list")
     public String receivableList(Model model) {
         model.addAttribute("bmsBillStatisticsEntity", new BmsBillStatisticsEntity());
         return "modules/bms/finance/bmsBillReceivableStatisticsList";
@@ -48,7 +48,7 @@ public class BmsBillStatisticsController extends BaseController {
      * 应付列表页面
      */
     @RequiresPermissions("bms:finance:bmsBillStatistics:list:payable")
-    @RequestMapping("list/payable")
+    @RequestMapping("/payable/list")
     public String payableList(Model model) {
         model.addAttribute("bmsBillStatisticsEntity", new BmsBillStatisticsEntity());
         return "modules/bms/finance/bmsBillPayableStatisticsList";

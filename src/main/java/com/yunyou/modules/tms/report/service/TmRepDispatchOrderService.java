@@ -3,13 +3,15 @@ package com.yunyou.modules.tms.report.service;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.yunyou.common.utils.time.DateUtils;
 import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.collection.CollectionUtil;
+import com.yunyou.common.utils.number.BigDecimalUtil;
 import com.yunyou.common.utils.time.DateFormatUtil;
 import com.yunyou.common.utils.time.DateUtil;
+import com.yunyou.common.utils.time.DateUtils;
 import com.yunyou.core.persistence.Page;
 import com.yunyou.core.service.BaseService;
+import com.yunyou.modules.interfaces.gps.GpsRunTrackInfo;
 import com.yunyou.modules.interfaces.gps.Response;
 import com.yunyou.modules.interfaces.gps.e6.E6Client;
 import com.yunyou.modules.interfaces.gps.e6.constant.Constants;
@@ -17,9 +19,6 @@ import com.yunyou.modules.interfaces.gps.e6.entity.EquipmentHistoryInfoByGpsNoRe
 import com.yunyou.modules.interfaces.gps.e6.util.SignUtil;
 import com.yunyou.modules.interfaces.gps.g7.G7Client;
 import com.yunyou.modules.interfaces.gps.g7.constant.ApiPathList;
-import com.yunyou.modules.interfaces.gps.g7.entity.VehicleTracksByGpsNoResponse;
-import com.yunyou.modules.interfaces.gps.jy.JyClient;
-import com.yunyou.modules.interfaces.gps.jy.entity.TrackInfoByVehicleNoResponse;
 import com.yunyou.modules.tms.common.GpsManufacturer;
 import com.yunyou.modules.tms.common.map.MapUtil;
 import com.yunyou.modules.tms.common.map.geo.Point;
@@ -28,7 +27,6 @@ import com.yunyou.modules.tms.order.service.TmDeviceAcquireDataService;
 import com.yunyou.modules.tms.report.entity.TmRepDispatchOrder;
 import com.yunyou.modules.tms.report.entity.TmRepDispatchOrderDrivingSpeed;
 import com.yunyou.modules.tms.report.mapper.TmRepDispatchOrderMapper;
-import com.yunyou.common.utils.number.BigDecimalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +38,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.yunyou.modules.interfaces.gps.e6.constant.ApiPathList.GET_EQUIP_INFO_HISTORY;
-import static com.yunyou.modules.interfaces.gps.jy.constant.ApiPathList.GET_VEHICLE_TRACKS_BY_VEHICLE_NO;
 
 @Service
 public class TmRepDispatchOrderService extends BaseService {
@@ -114,9 +111,6 @@ public class TmRepDispatchOrderService extends BaseService {
             case G7:
                 rsList = getSpeedFromG7(vehicleNo, gpsNo, departureTime, arrivalTime);
                 break;
-            case JY:
-                rsList = getSpeedFromJY(vehicleNo, gpsNo, departureTime, arrivalTime);
-                break;
             case E6:
                 rsList = getSpeedFromE6(vehicleNo, gpsNo, departureTime, arrivalTime);
                 break;
@@ -133,9 +127,9 @@ public class TmRepDispatchOrderService extends BaseService {
         params.put("from", DateUtils.formatDate(startTime, DateFormatUtil.PATTERN_DEFAULT_ON_SECOND));
         params.put("to", DateUtils.formatDate(endTime, DateFormatUtil.PATTERN_DEFAULT_ON_SECOND));
         params.put("timeInterval", "120");// 秒
-        List<VehicleTracksByGpsNoResponse> list;
+        List<GpsRunTrackInfo> list;
         try {
-            Response response = G7Client.get(ApiPathList.GET_VEHICLE_TRACKS_BY_GPS_NO, params);
+            Response response = G7Client.get(ApiPathList.GET_TRACKS_BY_GPS_NO, params);
             if (response == null || StringUtils.isBlank(response.getBody())) {
                 return rsList;
             }
@@ -143,17 +137,17 @@ public class TmRepDispatchOrderService extends BaseService {
             if (res.getInteger("code") != 0 && res.getInteger("sub_code") != 0) {
                 return rsList;
             }
-            list = res.getJSONArray("data").toJavaList(VehicleTracksByGpsNoResponse.class);
+            list = res.getJSONArray("data").toJavaList(GpsRunTrackInfo.class);
         } catch (Exception e) {
             logger.info("根据GPS获取车辆历史轨迹（G7）异常", e);
             return rsList;
         }
         for (int i = 0; i < list.size(); i += 20) {
             try {
-                List<VehicleTracksByGpsNoResponse> subList = list.subList(i, Math.min(i + 20, list.size()));
-                List<String> addressList = MapUtil.getAddress(subList.stream().map(o -> new Point(o.getLng(), o.getLat())).collect(Collectors.toList()), "gcj02ll");
+                List<GpsRunTrackInfo> subList = list.subList(i, Math.min(i + 20, list.size()));
+                List<String> addressList = MapUtil.getAddress(subList.stream().map(o -> new Point(o.getLon(), o.getLat())).collect(Collectors.toList()), "gcj02ll");
                 int index = 0;
-                for (VehicleTracksByGpsNoResponse o : subList) {
+                for (GpsRunTrackInfo o : subList) {
                     TmRepDispatchOrderDrivingSpeed speed = new TmRepDispatchOrderDrivingSpeed();
                     speed.setVehicleNo(vehicleNo);
                     speed.setGpsTime(new Date(o.getTime()));
@@ -163,39 +157,6 @@ public class TmRepDispatchOrderService extends BaseService {
                 }
             } catch (Exception ignored) {
             }
-        }
-        return rsList.stream().sorted(Comparator.comparing(TmRepDispatchOrderDrivingSpeed::getGpsTime)).collect(Collectors.toList());
-    }
-
-    private List<TmRepDispatchOrderDrivingSpeed> getSpeedFromJY(String vehicleNo, String gpsNo, Date startTime, Date endTime) {
-        List<TmRepDispatchOrderDrivingSpeed> rsList = Lists.newArrayList();
-        Map<String, String> params = Maps.newHashMap();
-        params.put("vehicleNo", vehicleNo);
-        params.put("beginTime", DateUtils.formatDate(startTime, "yyyy-MM-dd HH:mm"));
-        params.put("endTime", DateUtils.formatDate(endTime, "yyyy-MM-dd HH:mm"));
-        params.put("isDisPlayLocation", "true");
-        List<TrackInfoByVehicleNoResponse> list;
-        try {
-            Response response = JyClient.get(GET_VEHICLE_TRACKS_BY_VEHICLE_NO, params);
-            if (response == null || StringUtils.isBlank(response.getBody())) {
-                return rsList;
-            }
-            JSONObject res = JSONObject.parseObject(response.getBody());
-            if (res.getInteger("code") != 1) {
-                return rsList;
-            }
-            list = res.getJSONObject("msg").getJSONArray("track_info").toJavaList(TrackInfoByVehicleNoResponse.class);
-        } catch (Exception e) {
-            logger.info("根据车牌号获取车辆历史轨迹（JY）异常", e);
-            return rsList;
-        }
-        for (TrackInfoByVehicleNoResponse o : list) {
-            TmRepDispatchOrderDrivingSpeed speed = new TmRepDispatchOrderDrivingSpeed();
-            speed.setVehicleNo(vehicleNo);
-            speed.setGpsTime(o.getTime());
-            speed.setAddress(o.getLocation());
-            speed.setSpeed(o.getSpeed());
-            rsList.add(speed);
         }
         return rsList.stream().sorted(Comparator.comparing(TmRepDispatchOrderDrivingSpeed::getGpsTime)).collect(Collectors.toList());
     }

@@ -1,13 +1,12 @@
 package com.yunyou.modules.tms.report.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.yunyou.common.utils.time.DateUtils;
 import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.time.DateFormatUtil;
+import com.yunyou.common.utils.time.DateUtils;
 import com.yunyou.core.persistence.Page;
 import com.yunyou.core.service.BaseService;
 import com.yunyou.modules.interfaces.gps.Response;
@@ -17,15 +16,12 @@ import com.yunyou.modules.interfaces.gps.e6.util.SignUtil;
 import com.yunyou.modules.interfaces.gps.g7.G7Client;
 import com.yunyou.modules.interfaces.gps.g7.constant.ApiPathList;
 import com.yunyou.modules.interfaces.gps.g7.entity.VehicleCurrentTempInfo;
-import com.yunyou.modules.interfaces.gps.jy.JyClient;
-import com.yunyou.modules.interfaces.gps.jy.constant.Constants;
 import com.yunyou.modules.tms.common.GpsManufacturer;
 import com.yunyou.modules.tms.report.entity.TmRepVehicleMonitoring;
 import com.yunyou.modules.tms.report.mapper.TmRepVehicleMonitoringMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,7 +41,7 @@ public class TmRepVehicleMonitoringService extends BaseService {
     private List<TmRepVehicleMonitoring> findList(TmRepVehicleMonitoring entity) {
         List<TmRepVehicleMonitoring> list = mapper.findList(entity);
         Map<String, List<TmRepVehicleMonitoring>> map = list.stream()
-                .filter(o -> GpsManufacturer.G7.name().equals(o.getGpsManufacturer()) || GpsManufacturer.JY.name().equals(o.getGpsManufacturer()) || GpsManufacturer.E6.name().equals(o.getGpsManufacturer()))
+                .filter(o -> GpsManufacturer.G7.name().equals(o.getGpsManufacturer()) || GpsManufacturer.E6.name().equals(o.getGpsManufacturer()))
                 .collect(Collectors.groupingBy(TmRepVehicleMonitoring::getGpsManufacturer));
         for (Map.Entry<String, List<TmRepVehicleMonitoring>> entry : map.entrySet()) {
             switch (GpsManufacturer.valueOf(entry.getKey())) {
@@ -57,26 +53,6 @@ public class TmRepVehicleMonitoringService extends BaseService {
                             continue;
                         }
                         TmRepVehicleMonitoring tmRepVehicleMonitoring = vehicleCurrentInfoFormG7.get(o.getVehicleNo());
-                        o.setGpsStatus(tmRepVehicleMonitoring.getGpsStatus());
-                        o.setTime(tmRepVehicleMonitoring.getTime());
-                        o.setGpsTime(tmRepVehicleMonitoring.getGpsTime());
-                        o.setLng(tmRepVehicleMonitoring.getLng());
-                        o.setLat(tmRepVehicleMonitoring.getLat());
-                        o.setAddress(tmRepVehicleMonitoring.getAddress());
-                        o.setCourse(tmRepVehicleMonitoring.getCourse());
-                        o.setAcquireTime(tmRepVehicleMonitoring.getAcquireTime());
-                        o.setTemperature1(tmRepVehicleMonitoring.getTemperature1());
-                        o.setTemperature2(tmRepVehicleMonitoring.getTemperature2());
-                    }
-                    break;
-                case JY:
-                    Map<String, TmRepVehicleMonitoring> vehicleCurrentInfoFormJY = getVehicleCurrentInfoFormJY(entry.getValue().stream().map(TmRepVehicleMonitoring::getVehicleNo).collect(Collectors.toSet()));
-                    for (TmRepVehicleMonitoring o : list) {
-                        if (!vehicleCurrentInfoFormJY.containsKey(o.getVehicleNo())) {
-                            o.setGpsStatus(2);
-                            continue;
-                        }
-                        TmRepVehicleMonitoring tmRepVehicleMonitoring = vehicleCurrentInfoFormJY.get(o.getVehicleNo());
                         o.setGpsStatus(tmRepVehicleMonitoring.getGpsStatus());
                         o.setTime(tmRepVehicleMonitoring.getTime());
                         o.setGpsTime(tmRepVehicleMonitoring.getGpsTime());
@@ -126,7 +102,7 @@ public class TmRepVehicleMonitoringService extends BaseService {
         params.put("addr_required", true);
         JSONObject data;
         try {
-            Response response = G7Client.post(ApiPathList.GET_BATCH_TRUCK_CUR_INFO, params);
+            Response response = G7Client.post(ApiPathList.GET_TRUCK_INFO, params);
             if (response == null || StringUtils.isBlank(response.getBody())) {
                 return rsMap;
             }
@@ -174,42 +150,6 @@ public class TmRepVehicleMonitoringService extends BaseService {
                     }
                 }
                 rsMap.put(vehicleNo, tmRepVehicleMonitoring);
-            } catch (Exception ignore) {
-            }
-        }
-        return rsMap;
-    }
-
-    private Map<String, TmRepVehicleMonitoring> getVehicleCurrentInfoFormJY(Set<String> vehicleNos) {
-        Map<String, TmRepVehicleMonitoring> rsMap = Maps.newHashMap();
-        JSONArray objects;
-        try {
-            Response response = JyClient.get("/rest/interface/monitor/" + Constants.ACCESS_ID + "/" + Constants.SECRET_KEY + "/" + URLEncoder.encode(String.join(",", vehicleNos)), null);
-            if (response == null || StringUtils.isBlank(response.getBody())) {
-                return rsMap;
-            }
-            JSONObject res = JSON.parseObject(response.getBody());
-            if (res.getInteger("result") != 1) {
-                return rsMap;
-            }
-            objects = res.getJSONArray("NewDataSet");
-        } catch (Exception ignore) {
-            return rsMap;
-        }
-        for (Object value : objects) {
-            try {
-                JSONObject next = (JSONObject) value;
-                TmRepVehicleMonitoring o = new TmRepVehicleMonitoring();
-                o.setGpsTime(next.getString("GPSTime"));
-                o.setLng(next.getDouble("Lon"));
-                o.setLat(next.getDouble("Lat"));
-                o.setAddress(next.getString("PlaceName") + next.getString("RoadName"));
-                o.setSpeed(next.getInteger("Speed"));
-                o.setCourse(next.getInteger("Direction"));
-                o.setAcquireTime(next.getString("GPSTime"));
-                o.setTemperature1(next.getDouble("tmp1"));
-                o.setTemperature2(next.getDouble("tmp2"));
-                rsMap.put(next.getString("Vehicle"), o);
             } catch (Exception ignore) {
             }
         }

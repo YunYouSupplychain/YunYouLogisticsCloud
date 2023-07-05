@@ -34,7 +34,7 @@ public class BmsReportContractSubjectController extends BaseController {
     private BmsReportContractSubjectService bmsReportContractSubjectService;
 
     @RequiresPermissions(value = "bms:report:contractSubject:list")
-    @RequestMapping("form")
+    @RequestMapping("list")
     public String list(Model model) {
         model.addAttribute("bmsReportContractSubjectQuery", new BmsReportContractSubjectQuery());
         return "modules/bms/report/bmsReportContractSubjectList";

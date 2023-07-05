@@ -98,8 +98,19 @@
                                 <form:options items="${fns:getDictList('SYS_YES_NO')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
                             </form:select>
                         </td>
-                        <td class="width-10"></td>
-                        <td class="width-15"></td>
+                        <td class="width-8"><label class="pull-right">供应商：</label></td>
+                        <td class="width-12">
+                            <input type="hidden" id="supplierType" value="SUPPLIER"/>
+                            <sys:grid title="供应商" url="${ctx}/tms/basic/tmTransportObj/grid"
+                                      fieldId="supplierCode" fieldName="supplierCode"
+                                      fieldKeyName="transportObjCode" fieldValue="${tmTransportEquipmentTypeEntity.supplierCode}"
+                                      displayFieldId="supplierName" displayFieldName="supplierName"
+                                      displayFieldKeyName="transportObjName" displayFieldValue="${tmTransportEquipmentTypeEntity.supplierName}"
+                                      fieldLabels="编码|名称" fieldKeys="transportObjCode|transportObjName"
+                                      searchLabels="编码|名称" searchKeys="transportObjCode|transportObjName"
+                                      queryParams="transportObjType|orgId" queryParamValues="supplierType|orgId"
+                                      cssClass="form-control"/>
+                        </td>
                         <td class="width-10"></td>
                         <td class="width-15"></td>
                     </tr>

@@ -1,14 +1,13 @@
 package com.yunyou.modules.tms.order.manager.mapper;
 
-import java.util.List;
-
-import com.yunyou.modules.tms.order.entity.extend.*;
-import org.apache.ibatis.annotations.Param;
-
 import com.yunyou.core.persistence.BaseMapper;
 import com.yunyou.core.persistence.annotation.MyBatisMapper;
 import com.yunyou.modules.tms.order.entity.TmCarrierFreight;
 import com.yunyou.modules.tms.order.entity.TmDispatchOrderHeader;
+import com.yunyou.modules.tms.order.entity.extend.*;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 @MyBatisMapper
 public interface TmDispatchOrderMapper extends BaseMapper<TmDispatchOrderHeader> {
@@ -38,4 +37,6 @@ public interface TmDispatchOrderMapper extends BaseMapper<TmDispatchOrderHeader>
     List<TmDispatchVehicleEntity> findDispatchVehicles(@Param("transportNo") String transportNo, @Param("baseOrgId") String baseOrgId, @Param("orgId") String orgId);
 
     List<TmNoReturnVehicleInfo> findNoReturnVehicle();
+
+    List<TmDispatchVehicleEntity> findRunningVehicle(@Param("orgId") String orgId);
 }

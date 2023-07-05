@@ -2,9 +2,9 @@ package com.yunyou.modules.tms.rf.service;
 
 import com.google.common.collect.Lists;
 import com.yunyou.common.ResultMessage;
-import com.yunyou.common.utils.time.DateUtils;
 import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.collection.CollectionUtil;
+import com.yunyou.common.utils.time.DateUtils;
 import com.yunyou.modules.sys.entity.User;
 import com.yunyou.modules.sys.utils.UserUtils;
 import com.yunyou.modules.tms.common.TmsConstants;
@@ -94,7 +94,7 @@ public class TmRfRepairOrderService {
             msg.setMessage("维修工单不存在！");
             return msg;
         }
-        if (!TmsConstants.REPAIR_STATUS_00.equals(repairOrderEntity.getStatus())) {
+        if (!TmsConstants.REPAIR_ORDER_STATUS_00.equals(repairOrderEntity.getStatus())) {
             msg.setSuccess(false);
             msg.setMessage("维修工单状态不为新建！");
             return msg;

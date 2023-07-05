@@ -682,13 +682,15 @@
                         tdoh.dispatch_status             AS "dispatchStatus",
                         tdoh.car_no                      AS "vehicleNo",
                         tv.transport_equipment_type_code AS "equipmentNo",
+                        ttet.supplier_code               AS "gpsManufacturer",
                         tdoh.dispatch_time               AS "dispatchTime",
                         tdoh.update_date                 AS "lastTravelTime"
         from tm_dispatch_order_label a
             inner join tm_dispatch_order_header tdoh on a.dispatch_no = tdoh.dispatch_no and a.org_id = tdoh.org_id
-            left join tm_vehicle tv on tdoh.car_no = tv.car_no and tdoh.base_org_id = tv.org_id
+            inner join tm_vehicle tv on tdoh.car_no = tv.car_no and tdoh.base_org_id = tv.org_id
+            inner join tm_transport_equipment_type ttet ON tv.transport_equipment_type_code = ttet.transport_equipment_type_code AND tv.org_id = ttet.org_id AND ttet.supplier_code IS NOT NULL
         <where>
-        <![CDATA[ tdoh.dispatch_status >= '30' ]]>
+        <![CDATA[ tdoh.dispatch_status >= '20' ]]>
           and a.transport_no = #{transportNo}
           and a.base_org_id = #{baseOrgId}
           and a.org_id = #{orgId}
@@ -716,6 +718,25 @@
         WHERE tdoh.departure_time IS NOT NULL
           AND tdoh.dispatch_status >= '20'
           AND tdoh.departure_time > DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY tdoh.car_no, tdoh.driver, tdoh.driver_tel, tdoh.base_org_id, tdoh.org_id
+    </select>
+    <select id="findRunningVehicle" resultType="com.yunyou.modules.tms.order.entity.extend.TmDispatchVehicleEntity">
+        SELECT tdoh.car_no                                                      as vehicleNo,
+               td.name                                                          as driverName,
+               tdoh.driver_tel                                                  as driverTel,
+               MAX(IF(tdad.id is null, tdoh.departure_time, tdad.acquire_time)) as startTime,
+               MAX(IF(thoh.status = '20', thoh.update_date, NOW()))             as endTime,
+               tv.transport_equipment_type_code                                 as gpsNo,
+               tdoh.base_org_id                                                 as baseOrgId,
+               tdoh.org_id                                                      as orgId
+        FROM tm_dispatch_order_header tdoh
+             INNER JOIN tm_vehicle tv ON tdoh.car_no = tv.car_no AND tdoh.base_org_id = tv.org_id
+             INNER JOIN tm_handover_order_header thoh ON tdoh.dispatch_no = thoh.dispatch_no AND tdoh.org_id = thoh.org_id
+             LEFT JOIN tm_device_acquire_data tdad ON tdoh.car_no = tdad.vehicle_no AND tv.transport_equipment_type_code = tdad.gps_no AND tdoh.org_id = tdad.org_id AND tdad.acquire_time > tdoh.departure_time
+             LEFT JOIN tm_driver td ON tdoh.driver = td.code AND tdoh.base_org_id = td.org_id
+        WHERE tdoh.departure_time IS NOT NULL
+          AND tdoh.dispatch_status = '20'
+          AND tdoh.org_id = #{orgId}
         GROUP BY tdoh.car_no, tdoh.driver, tdoh.driver_tel, tdoh.base_org_id, tdoh.org_id
     </select>
 

@@ -1,6 +1,7 @@
 package com.yunyou.modules.tms.order.manager;
 
 import com.yunyou.common.utils.StringUtils;
+import com.yunyou.common.utils.number.BigDecimalUtil;
 import com.yunyou.core.persistence.Page;
 import com.yunyou.core.service.BaseService;
 import com.yunyou.modules.sys.GenNoType;
@@ -15,7 +16,6 @@ import com.yunyou.modules.tms.order.entity.extend.TmRepairOrderInboundInfoEntity
 import com.yunyou.modules.tms.order.entity.extend.TmRepairOrderOutboundInfoEntity;
 import com.yunyou.modules.tms.order.manager.mapper.TmRepairOrderMapper;
 import com.yunyou.modules.tms.order.service.*;
-import com.yunyou.common.utils.number.BigDecimalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +84,7 @@ public class TmRepairOrderManager extends BaseService {
     public String saveEntity(TmRepairOrderEntity entity) {
         if (StringUtils.isBlank(entity.getId())) {
             entity.setRepairNo(noService.getDocumentNo(GenNoType.TM_REPAIR_NO.name()));
-            entity.setStatus(TmsConstants.REPAIR_STATUS_00);
+            entity.setStatus(TmsConstants.REPAIR_ORDER_STATUS_00);
         }
         tmRepairOrderHeaderService.save(entity);
         // 生成授权数据

@@ -8,7 +8,7 @@
     <title>维护标注</title>
     <script src="${ctxStatic}/plugin/jquery/3.5.1/jquery-3.5.1.min.js"></script>
     <%--百度地图API--%>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?type=webgl&v=3.0&ak=${ak}"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?type=webgl&v=3.0&ak=${ak}"></script>
     <%--鼠标绘制工具--%>
     <link href="${ctxStatic}/plugin/BMapGLLib/DrawingManager.min.css" rel="stylesheet">
     <script src="${ctxStatic}/plugin/BMapGLLib/DrawingManager.min.js"></script>

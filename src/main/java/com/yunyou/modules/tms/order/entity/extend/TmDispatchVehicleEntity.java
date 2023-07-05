@@ -14,6 +14,8 @@ public class TmDispatchVehicleEntity {
     private String vehicleNo;
     // 设备号
     private String equipmentNo;
+    // 设备厂商
+    private String gpsManufacturer;
     // 派车时间
     private Date dispatchTime;
     // 最后行驶时间
@@ -41,6 +43,14 @@ public class TmDispatchVehicleEntity {
 
     public void setEquipmentNo(String equipmentNo) {
         this.equipmentNo = equipmentNo;
+    }
+
+    public String getGpsManufacturer() {
+        return gpsManufacturer;
+    }
+
+    public void setGpsManufacturer(String gpsManufacturer) {
+        this.gpsManufacturer = gpsManufacturer;
     }
 
     public String getDispatchStatus() {

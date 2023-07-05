@@ -116,23 +116,4 @@ public class E6Client {
         return convert(HttpPoolUtil.getHttpClient().execute(post));
     }
 
-    /*public static void main(String[] args) {
-        Map<String, String> params = new HashMap<>();
-        params.put("method", "getEquipInfoHistory");
-        params.put("appkey", Constants.ACCESS_ID);
-        params.put("timestamp", DateUtils.formatDate(new Date(), DateFormatUtil.PATTERN_DEFAULT_ON_SECOND));
-        params.put("format", "json");
-        params.put("equipcode", "E6WP1F060700033");
-        params.put("isoffsetlonlat", "1");
-        params.put("btime", "2020-09-27 00:00:00");
-        params.put("etime", "2020-09-27 23:59:59");
-        params.put("second", "0");// 秒
-        params.put("sign", SignUtil.sign(params));
-        try {
-            Response response = E6Client.get(GET_EQUIP_INFO_HISTORY, params);
-            System.out.println(JSON.toJSONString(response));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 }

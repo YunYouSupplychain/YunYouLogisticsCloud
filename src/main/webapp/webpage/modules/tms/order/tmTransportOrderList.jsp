@@ -201,11 +201,11 @@
                         <shiro:hasPermission name="order:tmTransportOrder:vehicleLocation">
                             <li><a id="vehicleLocation" class="disabled" onclick="vehicleLocation()"> 查看车辆位置</a></li>
                         </shiro:hasPermission>
-                        <shiro:hasPermission name="order:tmTransportOrder:tracking">
-                            <li><a id="tracking" class="disabled" onclick="tracking()"> 物流节点跟踪</a></li>
-                        </shiro:hasPermission>
                         <shiro:hasPermission name="order:tmTransportOrder:runTrack">
                             <li><a id="runTrack" class="disabled" onclick="runTrack()"> 查看行车轨迹</a></li>
+                        </shiro:hasPermission>
+                        <shiro:hasPermission name="order:tmTransportOrder:tracking">
+                            <li><a id="tracking" class="disabled" onclick="tracking()"> 物流节点跟踪</a></li>
                         </shiro:hasPermission>
                         <shiro:hasPermission name="order:tmTransportOrder:annex">
                             <li><a id="annex" class="disabled" onclick="annex()"> 附件</a></li>

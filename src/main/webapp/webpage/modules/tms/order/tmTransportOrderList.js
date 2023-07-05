@@ -56,8 +56,6 @@ $(document).ready(function () {
 	$("#baseOrgId").val(tmOrg.id);
 	$("#orderTimeFm").datetimepicker({format: "YYYY-MM-DD 00:00:00"});
 	$("#orderTimeTo").datetimepicker({format: "YYYY-MM-DD 23:59:59"});
-	$("#orderTimeFm input").val(jp.dateFormat(new Date(), "yyyy-MM-dd") + " 00:00:00");
-	$("#orderTimeTo input").val(jp.dateFormat(new Date(), "yyyy-MM-dd") + " 23:59:59");
 
 	// 初始化各页签中Bootstrap表格
 	$("#allTable").bootstrapTable(getOption(allParams));
@@ -555,28 +553,10 @@ function receipt() {
 		}
 	});
 }
+
 /*查看行车轨迹*/
 function runTrack() {
-	var idx = jp.loading();
-	var row = $(curTab).bootstrapTable('getSelections')[0];
-	jp.post("${ctx}/tms/order/tmTransportOrder/runTrack", {'transportNo': row.transportNo, 'baseOrgId': row.baseOrgId, 'orgId': row.orgId}, function (data) {
-		if (data.success) {
-			jp.close(idx);
-			top.layer.open({
-				type: 2,
-				area: ['90%', '90%'],
-				title: '行车轨迹',
-				auto: false,
-				content: "webpage/modules/tms/order/tmRunTrackList.jsp",
-				success: function (layero, index) {
-					var iframeWin = layero.find('iframe')[0].contentWindow;
-					iframeWin.drawPolyline(data.body.tracks);
-				}
-			});
-		} else {
-			jp.info(data.msg);
-		}
-	});
+	jp.openDialogView('查看行车轨迹', "${ctx}/tms/order/tmTransportOrder/runTrack?id=" + getIdSelections(), '90%', '90%');
 }
 
 /*查看车辆位置*/

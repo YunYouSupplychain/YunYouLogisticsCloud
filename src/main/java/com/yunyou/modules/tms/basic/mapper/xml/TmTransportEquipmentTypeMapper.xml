@@ -39,6 +39,7 @@
 		a.min_load_cubic AS "minLoadCubic",
 		a.max_load_cubic AS "maxLoadCubic",
 		a.allow_overweight_rate AS "allowOverweightRate",
+		a.supplier_code AS "supplierCode",
 		a.org_id AS "orgId",
 		a.rec_ver AS "recVer"
 	</sql>
@@ -146,6 +147,7 @@
 			min_load_cubic,
 			max_load_cubic,
 			allow_overweight_rate,
+			supplier_code,
 			org_id,
 			rec_ver
 		) VALUES (
@@ -185,6 +187,7 @@
 			#{minLoadCubic},
 			#{maxLoadCubic},
 			#{allowOverweightRate},
+			#{supplierCode},
 			#{orgId},
 			#{recVer}
 		)
@@ -225,6 +228,7 @@
 			min_load_cubic = #{minLoadCubic},
 			max_load_cubic = #{maxLoadCubic},
 			allow_overweight_rate = #{allowOverweightRate},
+			supplier_code = #{supplierCode},
 			org_id = #{orgId},
 			rec_ver = rec_ver + 1
 		WHERE id = #{id} AND rec_ver = #{recVer}

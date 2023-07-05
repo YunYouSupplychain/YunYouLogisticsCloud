@@ -34,6 +34,7 @@ public class WmShipDataEntity extends BanQinWmSoAlloc {
     private Date shipTimeTo;
     private Date orderTimeFm;
     private Date orderTimeTo;
+    private String isTracking;
 
     public String getOrgName() {
         return orgName;
@@ -77,6 +78,14 @@ public class WmShipDataEntity extends BanQinWmSoAlloc {
 
     public void setOrderTimeTo(Date orderTimeTo) {
         this.orderTimeTo = orderTimeTo;
+    }
+
+    public String getIsTracking() {
+        return isTracking;
+    }
+
+    public void setIsTracking(String isTracking) {
+        this.isTracking = isTracking;
     }
 
     @ExcelField(title = "出库单号", align = 2, sort = 7)

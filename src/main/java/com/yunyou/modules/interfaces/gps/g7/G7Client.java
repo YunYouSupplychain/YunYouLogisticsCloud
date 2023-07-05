@@ -208,34 +208,4 @@ public class G7Client {
         return convert(HttpPoolUtil.getHttpClient().execute(delete));
     }
 
-    /*public static void main(String[] args) {
-        *//*Map<String, String> params = new HashMap<>();
-        params.put("gpsno", "90319828");
-        params.put("from", "2021-08-02 09:01:45.0");
-        params.put("to", "2021-09-09 09:25:32.0");
-        params.put("space", "1");// 是否按一分钟间隔查询数据，1：是，else：否
-        params.put("page_no", "2");
-        params.put("orderby", "time asc");
-        Response response;
-        try {
-            response = G7Client.get(ApiPathList.GET_GPS_EQUIPMENT_TEMPERATURE, params);
-            System.out.println(JSON.toJSONString(response));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*//*
-
-
-        Map<String, String> params = new HashMap<>();
-        params.put("gpsno", "90157565");
-        params.put("from", "2021-11-02 09:01:45");
-        params.put("to", "2021-11-03 09:25:32");
-        Response response;
-        try {
-            response = G7Client.get(ApiPathList.GET_VEHICLE_TRACKS_BY_GPS_NO, params);
-            System.out.println(JSON.toJSONString(response));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
 }

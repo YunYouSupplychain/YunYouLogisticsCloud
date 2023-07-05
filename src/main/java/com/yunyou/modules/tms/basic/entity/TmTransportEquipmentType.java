@@ -1,7 +1,7 @@
 package com.yunyou.modules.tms.basic.entity;
 
-import com.yunyou.core.persistence.DataEntity;
 import com.yunyou.common.utils.excel.annotation.ExcelField;
+import com.yunyou.core.persistence.DataEntity;
 
 /**
  * 运输设备类型Entity
@@ -40,6 +40,7 @@ public class TmTransportEquipmentType extends DataEntity<TmTransportEquipmentTyp
 	private Double minLoadCubic;		// 最小装载容积
 	private Double maxLoadCubic;		// 最大装载容积
 	private Double allowOverweightRate;		// 允许超重比例
+	private String supplierCode;// 厂商编码
 	private String orgId;		// 机构ID
 
 	public TmTransportEquipmentType() {
@@ -314,6 +315,14 @@ public class TmTransportEquipmentType extends DataEntity<TmTransportEquipmentTyp
 
 	public void setAllowOverweightRate(Double allowOverweightRate) {
 		this.allowOverweightRate = allowOverweightRate;
+	}
+
+	public String getSupplierCode() {
+		return supplierCode;
+	}
+
+	public void setSupplierCode(String supplierCode) {
+		this.supplierCode = supplierCode;
 	}
 	
 	@ExcelField(title="机构ID", align=2, sort=36)

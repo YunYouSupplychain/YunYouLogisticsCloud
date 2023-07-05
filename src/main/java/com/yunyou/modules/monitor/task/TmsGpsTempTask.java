@@ -4,13 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.dyvmsapi20170525.models.SingleCallByTtsRequest;
 import com.aliyun.dyvmsapi20170525.models.SingleCallByTtsResponse;
-import com.yunyou.common.utils.*;
+import com.google.common.collect.Lists;
+import com.yunyou.common.utils.IdGen;
+import com.yunyou.common.utils.SpringContextHolder;
+import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.collection.CollectionUtil;
 import com.yunyou.common.utils.time.DateFormatUtil;
 import com.yunyou.common.utils.time.DateUtil;
 import com.yunyou.common.utils.time.DateUtils;
 import com.yunyou.modules.interfaces.ALiYunUtil;
-import com.yunyou.modules.interfaces.edi.service.EdiLogService;
 import com.yunyou.modules.interfaces.gps.Response;
 import com.yunyou.modules.interfaces.gps.e6.E6Client;
 import com.yunyou.modules.interfaces.gps.e6.entity.EquipmentHistoryInfoByGpsNoResponse;
@@ -18,9 +20,6 @@ import com.yunyou.modules.interfaces.gps.e6.util.SignUtil;
 import com.yunyou.modules.interfaces.gps.g7.G7Client;
 import com.yunyou.modules.interfaces.gps.g7.entity.Temperature;
 import com.yunyou.modules.interfaces.gps.g7.entity.TemperatureByGpsNoResponse;
-import com.yunyou.modules.interfaces.gps.jy.JyClient;
-import com.yunyou.modules.interfaces.gps.jy.constant.Constants;
-import com.yunyou.modules.interfaces.gps.jy.entity.TemperatureByVehicleNoResponse;
 import com.yunyou.modules.monitor.entity.Task;
 import com.yunyou.modules.sys.SysParamConstants;
 import com.yunyou.modules.sys.utils.SysControlParamsUtils;
@@ -30,7 +29,6 @@ import com.yunyou.modules.tms.order.entity.TmDeviceAcquireData;
 import com.yunyou.modules.tms.order.entity.extend.TmNoReturnVehicleInfo;
 import com.yunyou.modules.tms.order.manager.TmDispatchOrderManager;
 import com.yunyou.modules.tms.order.service.TmDeviceAcquireDataService;
-import com.google.common.collect.Lists;
 import org.quartz.DisallowConcurrentExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.yunyou.modules.interfaces.gps.e6.constant.ApiPathList.GET_EQUIP_INFO_HISTORY;
-import static com.yunyou.modules.interfaces.gps.g7.constant.ApiPathList.GET_GPS_EQUIPMENT_TEMPERATURE;
-import static com.yunyou.modules.interfaces.gps.jy.constant.ApiPathList.GET_TEMPERATURE_BY_VEHICLE_NO;
+import static com.yunyou.modules.interfaces.gps.g7.constant.ApiPathList.GET_TEMPERATURE_BY_GPS_NO;
 
 /**
  * 获取GPS温度数据定时任务
@@ -54,7 +51,6 @@ public class TmsGpsTempTask extends Task {
     private final Logger logger = LoggerFactory.getLogger(TmsGpsTempTask.class);
     private TmDispatchOrderManager tmDispatchOrderManager = SpringContextHolder.getBean(TmDispatchOrderManager.class);
     private TmDeviceAcquireDataService tmDeviceAcquireDataService = SpringContextHolder.getBean(TmDeviceAcquireDataService.class);
-    private EdiLogService logService = SpringContextHolder.getBean(EdiLogService.class);
 
     @Override
     public void run() {
@@ -71,9 +67,6 @@ public class TmsGpsTempTask extends Task {
                 switch (GpsManufacturer.valueOf(o.getGpsManufacturer())) {
                     case G7:
                         tmDeviceAcquireDataList = getTemperatureFormG7(o);
-                        break;
-                    case JY:
-                        tmDeviceAcquireDataList = getTemperatureFormJY(o);
                         break;
                     case E6:
                         tmDeviceAcquireDataList = getTemperatureFormE6(o);
@@ -158,7 +151,7 @@ public class TmsGpsTempTask extends Task {
         params.put("space", "1");// 是否按一分钟间隔查询数据，1：是，else：否
         params.put("page_no", String.valueOf(pageNo));
         params.put("orderby", "time asc");
-        return G7Client.get(GET_GPS_EQUIPMENT_TEMPERATURE, params);
+        return G7Client.get(GET_TEMPERATURE_BY_GPS_NO, params);
     }
 
     private List<TmDeviceAcquireData> parseG7Response(TmNoReturnVehicleInfo o, Response response) {
@@ -191,59 +184,6 @@ public class TmsGpsTempTask extends Task {
         }
         return rsList;
     }
-
-
-    /**
-     * 获取捷依温度数据
-     *
-     * @return 温度
-     */
-    private List<TmDeviceAcquireData> getTemperatureFormJY(TmNoReturnVehicleInfo o) throws Exception {
-        return parseJYResponse(o, getJYResponse(o));
-    }
-
-    private Response getJYResponse(TmNoReturnVehicleInfo o) throws Exception {
-        Map<String, String> params = new HashMap<>();
-        params.put("userName", Constants.ACCESS_ID);
-        params.put("password", MD5Util.encrypt32(Constants.SECRET_KEY).toUpperCase());
-        params.put("vehicleNo", o.getVehicleNo());
-        params.put("startTime", DateUtils.formatDate(o.getStartTime(), DateFormatUtil.PATTERN_DEFAULT_ON_SECOND));
-        params.put("endTime", DateUtils.formatDate(o.getEndTime(), DateFormatUtil.PATTERN_DEFAULT_ON_SECOND));
-        params.put("hasLocation", "1");
-        return JyClient.get(GET_TEMPERATURE_BY_VEHICLE_NO, params);
-    }
-
-    private List<TmDeviceAcquireData> parseJYResponse(TmNoReturnVehicleInfo o, Response response) {
-        if (response == null || StringUtils.isBlank(response.getBody())) {
-            return null;
-        }
-        JSONObject res = JSON.parseObject(response.getBody());
-        if (res.getInteger("code") != 1) {
-            return null;
-        }
-        List<TemperatureByVehicleNoResponse> list = res.getJSONObject("msg").getJSONArray("rows").toJavaList(TemperatureByVehicleNoResponse.class);
-        if (CollectionUtil.isEmpty(list)) {
-            return null;
-        }
-        List<TmDeviceAcquireData> tmDeviceAcquireDataList = Lists.newArrayList();
-        for (TemperatureByVehicleNoResponse data : list) {
-            TmDeviceAcquireData tmDeviceAcquireData = new TmDeviceAcquireData();
-            tmDeviceAcquireData.setId(IdGen.uuid());
-            tmDeviceAcquireData.setVehicleNo(o.getVehicleNo());
-            tmDeviceAcquireData.setGpsNo(o.getGpsNo());
-            tmDeviceAcquireData.setAcquireTime(data.getGpsTime());
-            tmDeviceAcquireData.setCoordinate(data.getLon() + data.getLat() + "");
-            tmDeviceAcquireData.setTemperature1(data.getTmp1());
-            tmDeviceAcquireData.setTemperature2(data.getTmp2());
-            tmDeviceAcquireData.setTemperature3(data.getTmp3());
-            tmDeviceAcquireData.setTemperature4(data.getTmp4());
-            tmDeviceAcquireData.setBaseOrgId(o.getBaseOrgId());
-            tmDeviceAcquireData.setOrgId(o.getOrgId());
-            tmDeviceAcquireDataList.add(tmDeviceAcquireData);
-        }
-        return tmDeviceAcquireDataList;
-    }
-
 
     /**
      * 获取易流温度数据

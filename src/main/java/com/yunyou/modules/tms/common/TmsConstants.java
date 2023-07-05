@@ -70,32 +70,33 @@ public class TmsConstants {
     public static final String TRANSPORT_OBJ_TYPE_5 = "SETTLEMENT";// 结算方
     public static final String TRANSPORT_OBJ_TYPE_6 = "CARRIER";// 承运商
     public static final String TRANSPORT_OBJ_TYPE_7 = "OUTLET";// 网点
-
     /*路由节点*/
     public static final String TRANSPORT_TRACK_NODE_RECEIVE = "揽收";
     public static final String TRANSPORT_TRACK_NODE_ARRIVE = "到件";
     public static final String TRANSPORT_TRACK_NODE_SHIP = "发件";
     public static final String TRANSPORT_TRACK_NODE_DELIVER = "配送";
     public static final String TRANSPORT_TRACK_NODE_SIGN = "签收";
-
+    /*司机工资类型*/
+    public static final String DRIVER_SALARY_TYPE_NORMAL = "NORMAL";    // 正常
+    public static final String DRIVER_SALARY_TYPE_EXTRA = "EXTRA";      // 加班
+    public static final String DRIVER_SALARY_TYPE_TANK = "TANK";        // 装罐
     /*默认提货网点*/
     public static final String DEFAULT_DELIVERY_SITE = "DDS";
     /*默认送货网点*/
     public static final String DEFAULT_RECEIVE_SITE = "DRS";
-
     /*车辆状态*/
     public static final String VEHICLE_STATUS_00 = "00";// 可用
     public static final String VEHICLE_STATUS_01 = "01";// 不可用
 
     public static final String DATA_HAS_EXPIRED = "数据已过期";
     public static final String NULL_STRING = "";
-
     /*数据来源*/
     public static final String DS_00 = "00";// 手工单(默认)
     public static final String DS_01 = "01";// 调度计划
-
     /*维修工单状态*/
-    public static final String REPAIR_STATUS_00 = "00";// 新建
+    public static final String REPAIR_ORDER_STATUS_00 = "00";       // 新建
+    public static final String REPAIR_ORDER_STATUS_10 = "10";       // 维修完成
+    public static final String REPAIR_ORDER_STATUS_99 = "99";       // 关闭
 
     /*运输订单类型*/
     public static final String TRANSPORT_ORDER_TYPE_1 = "1";// 正常

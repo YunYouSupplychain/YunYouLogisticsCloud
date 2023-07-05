@@ -62,7 +62,7 @@ html, body, #b-map {
     display: inline-block;
     width: 22px;
     height: 22px;
-    background-image: url("../../common/images/marker_edit.png");
+    background-image: url("../../images/marker_edit.png");
     background-size: 88px 44px;
     background-repeat: no-repeat;
 }

@@ -8,9 +8,5 @@ public enum GpsManufacturer {
     /**
      * 易流
      */
-    E6,
-    /**
-     * 捷依
-     */
-    JY
+    E6
 }

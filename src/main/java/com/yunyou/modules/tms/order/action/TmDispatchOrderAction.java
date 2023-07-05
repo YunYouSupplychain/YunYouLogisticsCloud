@@ -1,15 +1,19 @@
 package com.yunyou.modules.tms.order.action;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.yunyou.common.ResultMessage;
 import com.yunyou.common.exception.GlobalException;
 import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.collection.CollectionUtil;
 import com.yunyou.core.action.BaseAction;
 import com.yunyou.core.persistence.Page;
+import com.yunyou.modules.interfaces.gps.GpsNewestLocationInfo;
 import com.yunyou.modules.tms.common.map.geo.Point;
 import com.yunyou.modules.tms.order.entity.TmCarrierFreight;
 import com.yunyou.modules.tms.order.entity.extend.TmDispatchOrderEntity;
 import com.yunyou.modules.tms.order.entity.extend.TmDispatchOrderLabelEntity;
+import com.yunyou.modules.tms.order.entity.extend.TmDispatchVehicleEntity;
 import com.yunyou.modules.tms.order.entity.extend.TmTransportOrderEntity;
 import com.yunyou.modules.tms.order.manager.TmDispatchOrderManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,7 +203,28 @@ public class TmDispatchOrderAction extends BaseAction {
     /**
      * 描述：查询运输订单相关派车单车辆行驶轨迹
      */
-    public Map<String, List<Point>> findVehicleTracks(String transportNo, String baseOrgId, String orgId) {
-        return tmDispatchOrderManager.findVehicleTracks(transportNo, baseOrgId, orgId);
+    public Map<String, Point[]> findVehicleTracks(String transportNo, String baseOrgId, String orgId) {
+        try {
+            return tmDispatchOrderManager.findVehicleTracks(transportNo, baseOrgId, orgId);
+        } catch (Exception e) {
+            logger.error("获取G7车辆行驶轨迹数据异常", e);
+            return Maps.newHashMap();
+        }
+    }
+
+    /**
+     * 描述：查询运输订单相关派车单车辆当前位置
+     */
+    public List<GpsNewestLocationInfo> findVehicleLocation(String transportNo, String baseOrgId, String orgId) {
+        try {
+            return tmDispatchOrderManager.findVehicleLocation(transportNo, baseOrgId, orgId);
+        } catch (Exception e) {
+            logger.error("获取G7车辆当前位置数据异常", e);
+            return Lists.newArrayList();
+        }
+    }
+
+    public List<TmDispatchVehicleEntity> findRunningVehicle(String orgId) {
+        return tmDispatchOrderManager.findRunningVehicle(orgId);
     }
 }

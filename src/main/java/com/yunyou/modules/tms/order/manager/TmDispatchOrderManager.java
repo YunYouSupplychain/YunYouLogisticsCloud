@@ -1,15 +1,16 @@
 package com.yunyou.modules.tms.order.manager;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.yunyou.common.enums.SystemAliases;
 import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.collection.CollectionUtil;
+import com.yunyou.common.utils.time.DateUtil;
 import com.yunyou.core.persistence.Page;
 import com.yunyou.core.service.CrudService;
-import com.yunyou.modules.interfaces.gps.Response;
-import com.yunyou.modules.interfaces.gps.g7.G7Client;
-import com.yunyou.modules.interfaces.gps.g7.constant.ApiPathList;
-import com.yunyou.modules.interfaces.gps.g7.entity.VehicleTracksByGpsNoResponse;
+import com.yunyou.modules.interfaces.gps.GpsNewestLocationInfo;
+import com.yunyou.modules.interfaces.gps.GpsRunTrackInfo;
+import com.yunyou.modules.interfaces.gps.GpsUtils;
 import com.yunyou.modules.sys.GenNoType;
 import com.yunyou.modules.sys.SysParamConstants;
 import com.yunyou.modules.sys.entity.Office;
@@ -20,6 +21,7 @@ import com.yunyou.modules.sys.utils.SysControlParamsUtils;
 import com.yunyou.modules.sys.utils.UserUtils;
 import com.yunyou.modules.tms.authority.TmAuthorityRule;
 import com.yunyou.modules.tms.authority.TmAuthorityTable;
+import com.yunyou.modules.tms.common.GpsManufacturer;
 import com.yunyou.modules.tms.common.TmsConstants;
 import com.yunyou.modules.tms.common.TmsException;
 import com.yunyou.modules.tms.common.map.geo.Point;
@@ -30,8 +32,6 @@ import com.yunyou.modules.tms.order.service.TmDispatchOrderHeaderService;
 import com.yunyou.modules.tms.order.service.TmDispatchOrderLabelService;
 import com.yunyou.modules.tms.order.service.TmDispatchOrderSiteService;
 import com.yunyou.modules.tms.order.service.TmTransportOrderTrackService;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -360,50 +360,60 @@ public class TmDispatchOrderManager extends CrudService<TmDispatchOrderMapper, T
         }
     }
 
-    public Map<String, List<Point>> findVehicleTracks(String transportNo, String baseOrgId, String orgId) {
-        Map<String, List<Point>> rsMap = Maps.newHashMap();
+    public Map<String, Point[]> findVehicleTracks(String transportNo, String baseOrgId, String orgId) throws Exception {
+        Map<String, Point[]> rsMap = Maps.newHashMap();
 
         /*List<TmDispatchVehicleEntity> entities = mapper.findDispatchVehicles(transportNo, baseOrgId, orgId);
         for (TmDispatchVehicleEntity entity : entities) {
-            Map<String, String> queries = Maps.newHashMap();
-            queries.put("gpsno", entity.getEquipmentNo());
-            queries.put("from", DateFormatUtil.formatDate(DateFormatUtil.PATTERN_DEFAULT_ON_SECOND, entity.getDispatchTime()));
-            queries.put("to", DateFormatUtil.formatDate(DateFormatUtil.PATTERN_DEFAULT_ON_SECOND, "99".equals(entity.getDispatchStatus()) ? entity.getLastTravelTime() : new Date()));
-            queries.put("map", "baidu");
-            VehicleTracksByGpsNoResponse[] tracks = G7Utils.send(ApiPathList.GET_VEHICLE_TRACKS_BY_GPS_NO, queries);
-            if (tracks != null) {
-                List<MapPoint> points = Lists.newArrayList();
-                for (VehicleTracksByGpsNoResponse track : tracks) {
-                    points.add(new MapPoint(track.getLng(), track.getLat()));
-                }
-                rsMap.put(entity.getVehicleNo(), points);
+            String manufacturer = entity.getGpsManufacturer();
+            String vehicleNo = entity.getVehicleNo();
+            Date from = entity.getDispatchTime();
+            Date to = TmsConstants.DISPATCH_ORDER_STATUS_99.equals(entity.getDispatchStatus()) ? entity.getLastTravelTime() : new Date();
+            List<GpsRunTrackInfo> tracks = GpsUtils.getVehicleTrackInfo(manufacturer, vehicleNo, from, to);
+            if (CollectionUtil.isNotEmpty(tracks)) {
+                Point[] points = tracks.stream().map(o -> new Point(o.getLon(), o.getLat())).toArray(Point[]::new);
+                rsMap.put(vehicleNo, points);
             }
         }*/
-
-        Map<String, String> queries = Maps.newHashMap();
-        queries.put("gpsno", "90320098");
-        queries.put("from", "2021-06-25 00:00:00");
-        queries.put("to", "2021-06-30 00:00:00");
-        queries.put("map", "baidu");
-        try {
-            Response response = G7Client.get(ApiPathList.GET_VEHICLE_TRACKS_BY_GPS_NO, queries);
-            String body = response.getBody();
-            JSONObject res = JSONObject.parseObject(body);
-            if (res.getInteger("code") == 0 && res.getInteger("sub_code") == 0) {
-                List<Point> points = Lists.newArrayList();
-                List<VehicleTracksByGpsNoResponse> tracks = res.getJSONArray("data").toJavaList(VehicleTracksByGpsNoResponse.class);
-                for (VehicleTracksByGpsNoResponse track : tracks) {
-                    points.add(new Point(track.getLng(), track.getLat()));
-                }
-                rsMap.put("90320098", points);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        String manufacturer = GpsManufacturer.E6.name();
+        String vehicleNo = "沪DP6772";
+        Date from = DateUtil.subDays(new Date(), 5);
+        Date to = new Date();
+        List<GpsRunTrackInfo> tracks = GpsUtils.getVehicleTrackInfo(manufacturer, vehicleNo, from, to);
+        if (CollectionUtil.isNotEmpty(tracks)) {
+            Point[] points = tracks.stream().map(o -> new Point(o.getLon(), o.getLat())).toArray(Point[]::new);
+            rsMap.put(vehicleNo, points);
         }
         return rsMap;
     }
 
+    public List<GpsNewestLocationInfo> findVehicleLocation(String transportNo, String baseOrgId, String orgId) throws Exception {
+        List<GpsNewestLocationInfo> list = Lists.newArrayList();
+
+        /*List<TmDispatchVehicleEntity> entities = mapper.findDispatchVehicles(transportNo, baseOrgId, orgId);
+        Map<String, List<TmDispatchVehicleEntity>> map = entities.stream().collect(Collectors.groupingBy(TmDispatchVehicleEntity::getGpsManufacturer));
+        for (Map.Entry<String, List<TmDispatchVehicleEntity>> entry : map.entrySet()) {
+            String gpsManufacturer = entry.getKey();
+            List<String> vehicleNos = entry.getValue().stream().map(TmDispatchVehicleEntity::getVehicleNo).distinct().collect(Collectors.toList());
+            List<GpsNewestLocationInfo> infos = GpsUtils.getVehicleNewestLocationInfo(gpsManufacturer, vehicleNos);
+            if (CollectionUtil.isNotEmpty(infos)) {
+                list.addAll(infos);
+            }
+        }*/
+        String gpsManufacturer = GpsManufacturer.E6.name();
+        List<String> vehicleNos = Lists.newArrayList("沪DP6772");
+        List<GpsNewestLocationInfo> infos = GpsUtils.getVehicleNewestLocationInfo(gpsManufacturer, vehicleNos);
+        if (CollectionUtil.isNotEmpty(infos)) {
+            list.addAll(infos);
+        }
+        return list;
+    }
+
     public List<TmNoReturnVehicleInfo> findNoReturnVehicle() {
         return mapper.findNoReturnVehicle();
+    }
+
+    public List<TmDispatchVehicleEntity> findRunningVehicle(String orgId) {
+        return mapper.findRunningVehicle(orgId);
     }
 }

@@ -1,14 +1,14 @@
 package com.yunyou.modules.tms.order.web;
 
-import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 import com.yunyou.common.ResultMessage;
 import com.yunyou.common.json.AjaxJson;
 import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.collection.CollectionUtil;
-import com.yunyou.common.utils.collection.MapUtil;
 import com.yunyou.core.persistence.Page;
 import com.yunyou.core.web.BaseController;
-import com.yunyou.modules.tms.common.map.geo.Point;
+import com.yunyou.modules.sys.SysParamConstants;
+import com.yunyou.modules.sys.utils.SysControlParamsUtils;
 import com.yunyou.modules.tms.order.action.TmDispatchOrderAction;
 import com.yunyou.modules.tms.order.action.TmTransportOrderAction;
 import com.yunyou.modules.tms.order.entity.TmDirectDispatch;
@@ -17,9 +17,6 @@ import com.yunyou.modules.tms.order.entity.extend.TmDispatchOrderEntity;
 import com.yunyou.modules.tms.order.entity.extend.TmTransportOrderEntity;
 import com.yunyou.modules.tms.order.entity.extend.TmTransportReceiptInfo;
 import com.yunyou.modules.tms.order.entity.extend.TmTransportSignInfo;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,37 +175,19 @@ public class TmTransportOrderController extends BaseController {
         return j;
     }
 
-    @ResponseBody
     @RequiresPermissions("order:tmTransportOrder:runTrack")
     @RequestMapping(value = "runTrack")
-    public AjaxJson runTrackList(TmTransportOrderEntity entity) {
-        AjaxJson j = new AjaxJson();
-        // 获取订单派车车辆的行驶轨迹
-        Map<String, List<Point>> tracks = tmDispatchOrderAction.findVehicleTracks(entity.getTransportNo(), entity.getBaseOrgId(), entity.getOrgId());
-        if (MapUtil.isNotEmpty(tracks)) {
-            j.setSuccess(true);
-            j.put("tracks", tracks);
-        } else {
-            j.setSuccess(false);
-            j.setMsg("未发现派车车辆行驶轨迹");
-        }
-        return j;
+    public String runTrackList(TmTransportOrderEntity entity, Model model) {
+        model.addAttribute("dataList", tmDispatchOrderAction.findVehicleTracks(entity.getTransportNo(), entity.getBaseOrgId(), entity.getOrgId()));
+        model.addAttribute("ak", SysControlParamsUtils.getValue(SysParamConstants.MAP_WEB_CLIENT_AK));
+        return "modules/tms/order/tmRunTrackList";
     }
 
     @RequiresPermissions("order:tmTransportOrder:vehicleLocation")
     @RequestMapping(value = "vehicleLocation")
     public String vehicleLocationList(TmTransportOrderEntity entity, Model model) {
-        List<Map<String, String>> list = Lists.newArrayList();
-        list.add(ImmutableMap.of("key", "116.403613,39.912916"));
-        list.add(ImmutableMap.of("key", "114.403613,39.912916"));
-        list.add(ImmutableMap.of("key", "113.403613,35.912916"));
-        list.add(ImmutableMap.of("key", "115.403613,34.912916"));
-        list.add(ImmutableMap.of("key", "116.413613,34.912916"));
-        list.add(ImmutableMap.of("key", "115.423613,35.922916"));
-        list.add(ImmutableMap.of("key", "115.433613,36.932916"));
-        list.add(ImmutableMap.of("key", "117.443613,31.942916"));
-
-        model.addAttribute("points", JSON.toJSONString(list));
+        model.addAttribute("dataList", tmDispatchOrderAction.findVehicleLocation(entity.getTransportNo(), entity.getBaseOrgId(), entity.getOrgId()));
+        model.addAttribute("ak", SysControlParamsUtils.getValue(SysParamConstants.MAP_WEB_CLIENT_AK));
         return "modules/tms/order/tmVehicleLocationList";
     }
 
