@@ -140,7 +140,7 @@
 <div class="infowindow pop-infowindow" gpsno="{{row.gpsNo}}"><a href="javascript:;" class="iconfont icon-close close"></a>
     <div class="infowindow-title" style="background: rgb(36, 142, 228);"><img src="${ctxStatic}/images/car.png" class="car-img">
         <div class="inner-font">
-            <p><b class="pwCarnum">{{row.vehicleNo}}</b></p>
+            <p><b class="pwCarnum">{{row.no}}</b></p>
             <p style="margin-top:-8px;">
                 <span class="pwTrailMatch" style="display:none;margin-right:5px;">
                 匹配：<span class="pwTrailMatch_txt"></span></span>

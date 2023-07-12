@@ -1,5 +1,6 @@
 package com.yunyou.modules.interfaces.interactive.service;
 
+import com.yunyou.common.config.Global;
 import com.yunyou.common.enums.SystemAliases;
 import com.yunyou.common.utils.StringUtils;
 import com.yunyou.common.utils.collection.CollectionUtil;
@@ -117,10 +118,12 @@ public class PushTaskService {
         } else if (SystemAliases.WMS.getCode().equals(omTaskHeader.getPushSystem()) && OmsConstants.OMS_TASK_TYPE_02.equals(omTaskHeader.getTaskType())) {
             pushWmsService.pushTaskToInput(omTaskHeader);
         } else if (SystemAliases.TMS.getCode().equals(omTaskHeader.getPushSystem()) && OmsConstants.OMS_TASK_TYPE_03.equals(omTaskHeader.getTaskType())) {
-            if (omBusinessOrderTypeRelationService.isOnlyTransport(omTaskHeader.getBusinessOrderType(), omTaskHeader.getOrgId())) {
-                pushTmsService.pushTaskToTransport(omTaskHeader);
-            } else {
+            // OMS参数：是否下发运输任务至运输计划订单(Y:是 N:否)
+            String value = SysControlParamsUtils.getValue(SysParamConstants.IS_PUSH_PRE_TRANSPORT_ORDER, omTaskHeader.getOrgId());
+            if (Global.Y.equals(value)) {
                 pushTmsService.pushTaskToPreTransport(omTaskHeader);
+            } else {
+                pushTmsService.pushTaskToTransport(omTaskHeader);
             }
         } else {
             throw new OmsException("暂不支持该类型任务【" + omTaskHeader.getTaskType() + "】下发" + SystemAliases.value(omTaskHeader.getPushSystem()).getDesc());

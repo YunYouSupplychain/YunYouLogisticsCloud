@@ -16,11 +16,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class E6Client {
+
+    private static final Logger log = LoggerFactory.getLogger(E6Client.class);
 
     public static Response get(String path, Map<String, String> queries) throws Exception {
         Request request = new Request();
@@ -65,23 +69,23 @@ public class E6Client {
 
     private static Response convert(CloseableHttpResponse response) throws Exception {
         Response res = new Response();
-        if (null != response) {
-            res.setStatusCode(response.getStatusLine().getStatusCode());
-            for (Header header : response.getAllHeaders()) {
-                res.setHeader(header.getName(), MessageDigestUtil.iso88591ToUtf8(header.getValue()));
-            }
-
-            res.setContentType(res.getHeader("Content-Type"));
-            try {
-                res.setBody(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8));
-            } finally {
-                EntityUtils.consume(response.getEntity());
-                response.close();
-            }
-        } else {
+        if (response == null) {
             //服务器无回应
             res.setStatusCode(500);
             res.setErrorMessage("No Response");
+            return res;
+        }
+        res.setStatusCode(response.getStatusLine().getStatusCode());
+        for (Header header : response.getAllHeaders()) {
+            res.setHeader(header.getName(), MessageDigestUtil.iso88591ToUtf8(header.getValue()));
+        }
+
+        res.setContentType(res.getHeader("Content-Type"));
+        try {
+            res.setBody(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8));
+        } finally {
+            EntityUtils.consume(response.getEntity());
+            response.close();
         }
         return res;
     }
@@ -89,31 +93,47 @@ public class E6Client {
     /**
      * HTTP GET
      */
-    public static Response httpGet(String host, String path,
-                                   Map<String, String> headers,
-                                   Map<String, String> queries) throws Exception {
+    private static Response httpGet(String host, String path,
+                                    Map<String, String> headers,
+                                    Map<String, String> queries) throws Exception {
 
-        HttpGet get = new HttpGet(HttpPoolUtil.getUrl(host, path, queries));
-        return convert(HttpPoolUtil.getHttpClient().execute(get));
+        String url = HttpPoolUtil.getUrl(host, path, queries);
+        HttpGet get = new HttpGet(url);
+        if (headers != null) {
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                get.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+            }
+        }
+        Response response = convert(HttpPoolUtil.getHttpClient().execute(get));
+        if (log.isInfoEnabled()) {
+            log.info("url={}, headers={}, res={}", url, get.getAllHeaders(), response.getBody());
+        }
+        return response;
     }
 
     /**
      * HTTP POST
      */
-    public static Response httpPost(String host, String path,
-                                    Map<String, String> headers,
-                                    Map<String, String> queries,
-                                    String body) throws Exception {
+    private static Response httpPost(String host, String path,
+                                     Map<String, String> headers,
+                                     Map<String, String> queries,
+                                     String body) throws Exception {
 
-        HttpPost post = new HttpPost(HttpPoolUtil.getUrl(host, path, queries));
-        for (Map.Entry<String, String> e : headers.entrySet()) {
-            post.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+        String url = HttpPoolUtil.getUrl(host, path, queries);
+        HttpPost post = new HttpPost(url);
+        if (headers != null) {
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                post.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+            }
         }
         if (StringUtils.isNotBlank(body)) {
             post.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
-
         }
-        return convert(HttpPoolUtil.getHttpClient().execute(post));
+        Response response = convert(HttpPoolUtil.getHttpClient().execute(post));
+        if (log.isInfoEnabled()) {
+            log.info("url={}, headers={}, body={}, res={}", url, post.getAllHeaders(), body, response.getBody());
+        }
+        return response;
     }
 
 }

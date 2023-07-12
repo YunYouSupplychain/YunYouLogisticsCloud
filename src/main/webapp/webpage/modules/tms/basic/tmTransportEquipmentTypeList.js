@@ -50,6 +50,10 @@ function initTable() {
 			title: '英文名称',
 			sortable: true
 		}, {
+			field: 'supplierName',
+			title: '供应商',
+			sortable: true
+		}, {
 			field: 'temperatureType',
 			title: '温度类别',
 			sortable: true,

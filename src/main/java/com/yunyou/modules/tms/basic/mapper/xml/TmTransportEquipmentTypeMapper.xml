@@ -253,18 +253,20 @@
 
 	<select id="getEntity" resultType="com.yunyou.modules.tms.basic.entity.extend.TmTransportEquipmentTypeEntity" >
 		SELECT
+		ttos.transport_obj_name AS "supplierName",
 		<include refid="tmTransportEquipmentTypeColumns"/>
 		FROM tm_transport_equipment_type a
+		LEFT JOIN tm_transport_obj ttos ON a.supplier_code = ttos.transport_obj_code AND a.org_id = ttos.org_id
 		WHERE a.id = #{id}
 	</select>
 
 	<select id="findPage" resultType="com.yunyou.modules.tms.basic.entity.extend.TmTransportEquipmentTypeEntity" >
 		SELECT
+		ttos.transport_obj_name AS "supplierName",
 		<include refid="tmTransportEquipmentTypeColumns"/>
 		FROM tm_transport_equipment_type a
-		<include refid="tmTransportEquipmentTypeJoins"/>
+		LEFT JOIN tm_transport_obj ttos ON a.supplier_code = ttos.transport_obj_code AND a.org_id = ttos.org_id
 		<where>
-			1 = 1
 			${dataScope}
 			<if test="delFlag != null and delFlag != ''">
 				AND a.del_flag = #{delFlag}

@@ -50,18 +50,18 @@ public class SignUtil {
      */
     public static String sign(String secret, String method, String path,
                               Map<String, String> headers,
-                              Map<String, String> querys,
-                              Map<String, String> bodys) {
+                              Map<String, String> queries,
+                              Map<String, String> bodies) {
         try {
             Mac hmacSha256 = Mac.getInstance(Constants.HMAC_SHA256);
             byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
             hmacSha256.init(new SecretKeySpec(keyBytes, 0, keyBytes.length, Constants.HMAC_SHA256));
 
-            String stringToSign = buildStringToSign(method, path, headers, querys, bodys);
-
+            String stringToSign = buildStringToSign(method, path, headers, queries, bodies);
             LOG.info("StringToSign:\n{}", stringToSign);
-            return new String(Base64.encodeBase64(
-                    hmacSha256.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8))), StandardCharsets.UTF_8);
+
+            byte[] bytes = hmacSha256.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+            return new String(Base64.encodeBase64(bytes), StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -69,8 +69,8 @@ public class SignUtil {
 
     private static String buildStringToSign(String method, String path,
                                             Map<String, String> headers,
-                                            Map<String, String> querys,
-                                            Map<String, String> bodys) {
+                                            Map<String, String> queries,
+                                            Map<String, String> bodies) {
         StringBuilder sb = new StringBuilder();
         sb.append(method.toUpperCase()).append(LF);
         if (null != headers) {
@@ -88,7 +88,7 @@ public class SignUtil {
         }
         sb.append(LF);
         sb.append(buildHeaders(headers));
-        sb.append(buildResource(path, querys, bodys));
+        sb.append(buildResource(path, queries, bodies));
         return sb.toString();
     }
 
@@ -97,36 +97,37 @@ public class SignUtil {
      *
      * @return 待签名
      */
-    private static String buildResource(String path, Map<String, String> querys, Map<String, String> bodys) {
+    private static String buildResource(String path, Map<String, String> queries, Map<String, String> bodies) {
         StringBuilder sb = new StringBuilder();
-        if (!StringUtils.isBlank(path)) {
+        if (StringUtils.isNotBlank(path)) {
             sb.append(path);
         }
         Map<String, String> sortMap = new TreeMap<>();
-        if (null != querys) {
-            for (Map.Entry<String, String> query : querys.entrySet()) {
-                if (!StringUtils.isBlank(query.getKey())) {
+        if (null != queries) {
+            for (Map.Entry<String, String> query : queries.entrySet()) {
+                if (StringUtils.isNotBlank(query.getKey())) {
                     sortMap.put(query.getKey(), query.getValue());
                 }
             }
         }
-        if (null != bodys) {
-            for (Map.Entry<String, String> body : bodys.entrySet()) {
-                if (!StringUtils.isBlank(body.getKey())) {
+        if (null != bodies) {
+            for (Map.Entry<String, String> body : bodies.entrySet()) {
+                if (StringUtils.isNotBlank(body.getKey())) {
                     sortMap.put(body.getKey(), body.getValue());
                 }
             }
         }
         StringBuilder sbParam = new StringBuilder();
         for (Map.Entry<String, String> item : sortMap.entrySet()) {
-            if (!StringUtils.isBlank(item.getKey())) {
-                if (0 < sbParam.length()) {
-                    sbParam.append(SPE3_CONNECT);
-                }
-                sbParam.append(item.getKey());
-                if (!StringUtils.isBlank(item.getValue())) {
-                    sbParam.append(SPE4_EQUAL).append(item.getValue());
-                }
+            if (StringUtils.isBlank(item.getKey())) {
+                continue;
+            }
+            if (0 < sbParam.length()) {
+                sbParam.append(SPE3_CONNECT);
+            }
+            sbParam.append(item.getKey()).append(SPE4_EQUAL);
+            if (StringUtils.isNotBlank(item.getValue())) {
+                sbParam.append(item.getValue());
             }
         }
         if (0 < sbParam.length()) {
@@ -154,7 +155,7 @@ public class SignUtil {
                 if (isHeaderToSignByPrefix(header.getKey())) {
                     sb.append(header.getKey());
                     sb.append(SPE2_COLON);
-                    if (!StringUtils.isBlank(header.getValue())) {
+                    if (StringUtils.isNotBlank(header.getValue())) {
                         sb.append(header.getValue());
                     }
                     sb.append(LF);
@@ -165,7 +166,7 @@ public class SignUtil {
     }
 
     /**
-     * Http头是否参与签名 return
+     * Http头是否参与签名
      */
     private static boolean isHeaderToSign(String headerName, List<String> signHeaderPrefixList) {
         if (StringUtils.isBlank(headerName)) {

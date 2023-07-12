@@ -137,33 +137,29 @@ public class HttpPoolUtil {
      * @param queries 参数
      */
     public static String getUrl(String host, String path, Map<String, String> queries) throws UnsupportedEncodingException {
-        StringBuilder sbUrl = new StringBuilder();
-        sbUrl.append(host);
-        if (!StringUtils.isBlank(path)) {
+        StringBuilder sbUrl = new StringBuilder(host);
+        if (StringUtils.isNotBlank(path)) {
             sbUrl.append(path);
         }
-        if (null != queries) {
-            StringBuilder sbQuery = new StringBuilder();
-            for (Map.Entry<String, String> query : queries.entrySet()) {
-                if (0 < sbQuery.length()) {
-                    sbQuery.append(SPE3_CONNECT);
-                }
-                if (StringUtils.isBlank(query.getKey()) && !StringUtils.isBlank(query.getValue())) {
-                    sbQuery.append(query.getValue());
-                }
-                if (!StringUtils.isBlank(query.getKey())) {
-                    sbQuery.append(query.getKey());
-                    if (!StringUtils.isBlank(query.getValue())) {
-                        sbQuery.append(SPE4_EQUAL);
-                        sbQuery.append(URLEncoder.encode(query.getValue(), "UTF-8"));
-                    }
-                }
+        if (queries == null) {
+            return sbUrl.toString();
+        }
+        StringBuilder sbQuery = new StringBuilder();
+        for (Map.Entry<String, String> query : queries.entrySet()) {
+            if (StringUtils.isBlank(query.getKey())) {
+                continue;
             }
             if (0 < sbQuery.length()) {
-                sbUrl.append(SPE5_QUESTION).append(sbQuery);
+                sbQuery.append(SPE3_CONNECT);
+            }
+            sbQuery.append(query.getKey()).append(SPE4_EQUAL);
+            if (StringUtils.isNotBlank(query.getValue())) {
+                sbQuery.append(URLEncoder.encode(query.getValue(), "UTF-8"));
             }
         }
-
+        if (0 < sbQuery.length()) {
+            sbUrl.append(SPE5_QUESTION).append(sbQuery);
+        }
         return sbUrl.toString();
     }
 

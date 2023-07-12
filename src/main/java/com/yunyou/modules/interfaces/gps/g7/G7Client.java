@@ -30,7 +30,7 @@ public class G7Client {
 
     public static Response get(String path, Map<String, String> queries) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpConstants.HTTP_HEADER_G7_TIMESTAMP, "" + System.currentTimeMillis());
+        headers.put(HttpConstants.HTTP_HEADER_G7_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
 
         Request request = new Request();
         request.setHost(HttpSchema.HTTP + Constants.BASE_URL);
@@ -54,7 +54,7 @@ public class G7Client {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpConstants.HTTP_HEADER_CONTENT_MD5, MessageDigestUtil.base64AndMD5(body));
         headers.put(HttpConstants.HTTP_HEADER_CONTENT_TYPE, HttpConstants.CONTENT_TYPE_JSON);
-        headers.put(HttpConstants.HTTP_HEADER_G7_TIMESTAMP, "" + System.currentTimeMillis());
+        headers.put(HttpConstants.HTTP_HEADER_G7_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
 
         request.setMethod(Method.POST_JSON);
         request.setHeaders(headers);
@@ -123,24 +123,24 @@ public class G7Client {
 
     private static Response convert(CloseableHttpResponse response) throws Exception {
         Response res = new Response();
-        if (null != response) {
-            res.setStatusCode(response.getStatusLine().getStatusCode());
-            for (Header header : response.getAllHeaders()) {
-                res.setHeader(header.getName(), MessageDigestUtil.iso88591ToUtf8(header.getValue()));
-            }
-            res.setContentType(res.getHeader("Content-Type"));
-            res.setRequestId(res.getHeader("X-Ca-Request-Id"));
-            res.setErrorMessage(res.getHeader("X-Ca-Error-Message"));
-            try {
-                res.setBody(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8));
-            } finally {
-                EntityUtils.consume(response.getEntity());
-                response.close();
-            }
-        } else {
+        if (response == null) {
             // 服务器无回应
             res.setStatusCode(500);
             res.setErrorMessage("No Response");
+            return res;
+        }
+        res.setStatusCode(response.getStatusLine().getStatusCode());
+        for (Header header : response.getAllHeaders()) {
+            res.setHeader(header.getName(), MessageDigestUtil.iso88591ToUtf8(header.getValue()));
+        }
+        res.setContentType(res.getHeader("Content-Type"));
+        res.setRequestId(res.getHeader("X-Ca-Request-Id"));
+        res.setErrorMessage(res.getHeader("X-Ca-Error-Message"));
+        try {
+            res.setBody(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8));
+        } finally {
+            EntityUtils.consume(response.getEntity());
+            response.close();
         }
         return res;
     }
@@ -148,64 +148,102 @@ public class G7Client {
     /**
      * HTTP GET
      */
-    public static Response httpGet(String host, String path, String appKey, String appSecret,
-                                   Map<String, String> headers, Map<String, String> queries) throws Exception {
+    private static Response httpGet(String host, String path,
+                                    String appKey, String appSecret,
+                                    Map<String, String> headers,
+                                    Map<String, String> queries) throws Exception {
         headers = initialBasicHeader(HttpMethod.GET, path, headers, queries, appKey, appSecret);
+        String url = HttpPoolUtil.getUrl(host, path, queries);
 
-        HttpGet get = new HttpGet(HttpPoolUtil.getUrl(host, path, queries));
-        for (Map.Entry<String, String> e : headers.entrySet()) {
-            get.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+        HttpGet get = new HttpGet(url);
+        if (headers != null) {
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                get.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+            }
         }
-        return convert(HttpPoolUtil.getHttpClient().execute(get));
+        Response response = convert(HttpPoolUtil.getHttpClient().execute(get));
+        if (log.isInfoEnabled()) {
+            log.info("url={}, headers={}, res={}", url, get.getAllHeaders(), response.getBody());
+        }
+        return response;
     }
 
     /**
      * HTTP POST
      */
-    public static Response httpPost(String host, String path, String appKey, String appSecret,
-                                    Map<String, String> headers, Map<String, String> queries, String body) throws Exception {
+    private static Response httpPost(String host, String path,
+                                     String appKey, String appSecret,
+                                     Map<String, String> headers,
+                                     Map<String, String> queries,
+                                     String body) throws Exception {
         headers = initialBasicHeader(HttpMethod.POST, path, headers, queries, appKey, appSecret);
+        String url = HttpPoolUtil.getUrl(host, path, queries);
 
-        HttpPost post = new HttpPost(HttpPoolUtil.getUrl(host, path, queries));
-        for (Map.Entry<String, String> e : headers.entrySet()) {
-            post.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+        HttpPost post = new HttpPost(url);
+        if (headers != null) {
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                post.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+            }
         }
         if (StringUtils.isNotBlank(body)) {
             post.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
 
         }
-        return convert(HttpPoolUtil.getHttpClient().execute(post));
+        Response response = convert(HttpPoolUtil.getHttpClient().execute(post));
+        if (log.isInfoEnabled()) {
+            log.info("url={}, headers={}, body={}, res={}", url, post.getAllHeaders(), body, response.getBody());
+        }
+        return response;
     }
 
     /**
      * HTTP PUT
      */
-    public static Response httpPut(String host, String path, String appKey, String appSecret,
-                                   Map<String, String> headers, Map<String, String> queries, String body) throws Exception {
+    private static Response httpPut(String host, String path,
+                                    String appKey, String appSecret,
+                                    Map<String, String> headers,
+                                    Map<String, String> queries,
+                                    String body) throws Exception {
         headers = initialBasicHeader(HttpMethod.PUT, path, headers, queries, appKey, appSecret);
+        String url = HttpPoolUtil.getUrl(host, path, queries);
 
-        HttpPut put = new HttpPut(HttpPoolUtil.getUrl(host, path, queries));
-        for (Map.Entry<String, String> e : headers.entrySet()) {
-            put.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+        HttpPut put = new HttpPut(url);
+        if (headers != null) {
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                put.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+            }
         }
         if (StringUtils.isNotBlank(body)) {
             put.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
         }
-        return convert(HttpPoolUtil.getHttpClient().execute(put));
+        Response response = convert(HttpPoolUtil.getHttpClient().execute(put));
+        if (log.isInfoEnabled()) {
+            log.info("url={}, headers={}, body={}, res={}", url, put.getAllHeaders(), body, response.getBody());
+        }
+        return response;
     }
 
     /**
      * HTTP DELETE
      */
-    public static Response httpDelete(String host, String path, String appKey, String appSecret,
-                                      Map<String, String> headers, Map<String, String> queries) throws Exception {
+    private static Response httpDelete(String host, String path,
+                                       String appKey, String appSecret,
+                                       Map<String, String> headers,
+                                       Map<String, String> queries) throws Exception {
         headers = initialBasicHeader(HttpMethod.DELETE, path, headers, queries, appKey, appSecret);
+        String url = HttpPoolUtil.getUrl(host, path, queries);
 
-        HttpDelete delete = new HttpDelete(HttpPoolUtil.getUrl(host, path, queries));
-        for (Map.Entry<String, String> e : headers.entrySet()) {
-            delete.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+        HttpDelete delete = new HttpDelete(url);
+        if (headers != null) {
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                delete.addHeader(e.getKey(), MessageDigestUtil.utf8ToIso88591(e.getValue()));
+            }
         }
-        return convert(HttpPoolUtil.getHttpClient().execute(delete));
+        Response response = convert(HttpPoolUtil.getHttpClient().execute(delete));
+        if (log.isInfoEnabled()) {
+            log.info("url={}, headers={}, res={}", url, delete.getAllHeaders(), response.getBody());
+        }
+        return response;
     }
 
 }

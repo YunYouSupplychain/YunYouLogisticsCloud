@@ -69,7 +69,7 @@ function initWmCheckTable() {
             title: '是否序列号管理',
             sortable: false,
             formatter: function (value, row, index) {
-                return jp.getDictLabel(${fns:toJson(fns:getDictList('SYS_WM_YES_NO'))}, value, "-");
+                return jp.getDictLabel(${fns:toJson(fns:getDictList('SYS_YES_NO'))}, value, "-");
             }
         }, {
             field: 'qtyUom',

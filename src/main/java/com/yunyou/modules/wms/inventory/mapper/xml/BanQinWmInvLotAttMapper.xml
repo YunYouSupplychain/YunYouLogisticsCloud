@@ -198,19 +198,19 @@
 				AND a.lot_att01 = #{lotAtt01}
 			</if>
 			<if test="lotAtt01 == null or '' == lotAtt01">
-				AND (a.lot_att01 is null or a.lot_att01 = '')
+				AND a.lot_att01 is null
 			</if>
 			<if test="lotAtt02 != null and lotAtt02 != ''">
 				AND a.lot_att02 = #{lotAtt02}
 			</if>
 			<if test="null == lotAtt02 or '' == lotAtt02">
-				AND (a.lot_att02 is null or a.lot_att02 = '')
+				AND a.lot_att02 is null
 			</if>
 			<if test="lotAtt03 != null and lotAtt03 != ''">
 				AND a.lot_att03 = #{lotAtt03}
 			</if>
 			<if test="null == lotAtt03 or '' == lotAtt03">
-				AND (a.lot_att03 is null or a.lot_att03 = '')
+				AND a.lot_att03 is null
 			</if>
 			<if test="lotAtt04 != null and lotAtt04 != ''">
 				AND a.lot_att04 = #{lotAtt04}
